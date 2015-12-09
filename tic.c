@@ -39,7 +39,7 @@ void play(char *board)
 	{
         map(board);
         move(board);
-		turn = TOGGLE(turn);
+        turn = TOGGLE(turn);
 	}
 }
 
@@ -224,6 +224,7 @@ int minmax(char *board, int a, char move)
 /* Okay so this is where we use the minmax function to determine scores of each node. 
 int AI(char *board)
 {
+    
 }
 */
 
