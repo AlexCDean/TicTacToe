@@ -29,16 +29,16 @@ char turn = 'X'; // Let's get this global var off into pipelines instead.
 int main(int argc, char *argv[])
 {
     char board[10];
-	set(board);
-	return 0;
+    set(board);
+    return 0;
 }
 
 void play(char *board)
 {
-	while(1)
+    while(1)
 	{
-		map(board);
-		move(board);
+        map(board);
+        move(board);
 		turn = TOGGLE(turn);
 	}
 }
@@ -157,9 +157,29 @@ int checkFull(char *board)
 			sum--;
 			if(!sum)
 			{
-				return 1;
+                return 1;
 			}
 		}
+	}
+	return 0;
+}
+// Okay our AI needs to know if we can place a move, so this works. 
+int isLegal(char *board, int a)
+{
+	if(board[a] == ' ')
+	{
+		return 1; 
+	}
+	return 0;
+}
+	
+
+// This will allow the AI to stop going once an endstate is reached in our minimax. 
+int EndState(char *board)
+{
+	if( checkRow(board) || checkColumn(board) || checkDiag(board) || checkFull(board))
+	{
+		return 1;
 	}
 	return 0;
 }
@@ -171,6 +191,7 @@ int minmax(char *board, int a, char move)
 	int i;
 	char temp[10];
 	strcpy(temp, board);
+    // if the board is still good to go, play a move
 	if(!EndState(temp))
 	{
 		for(i = a; i<9; i++)
@@ -183,6 +204,7 @@ int minmax(char *board, int a, char move)
 			}
 		}
 	}
+    // if board is not good to go...
 	// Three outcomes. Win, lose and draw.
 	else if(checkFull(temp))
 	{
@@ -205,26 +227,6 @@ int AI(char *board)
 }
 */
 
-// Okay our AI needs to know if we can place a move, so this works. 
-int isLegal(char *board, int a)
-{
-	if(board[a] == ' ')
-	{
-		return 1; 
-	}
-	return 0;
-}
-	
-
-// This will allow the AI to stop going once an endstate is reached in our minimax. 
-int EndState(char *board)
-{
-	if( checkRow(board) || checkColumn(board) || checkDiag(board) || checkFull(board))
-	{
-		return 1;
-	}
-	return 0;
-}
 
 void check(char *board) 
 {
@@ -240,10 +242,8 @@ void check(char *board)
             printf("\nOh a draw, how cute\n");
             map(board);
             win(board);
-        } // Should draw when board is full AND no winning moves. 
+        } 
 }
-
-
 
 
 int move(char *board)
@@ -255,10 +255,11 @@ int move(char *board)
 	// Test for boundary (1-3 only for each) and test for legal move
 	if(LEGAL) 
 	{
-			board[((a-1)*3)+(b-1)] = turn;
-			clear(); // Needed to clear stdin. 
-			check(board);
-			return 0;
+        // Maths to map player input to actual board position, accounting for zero index
+        board[((a-1)*3)+(b-1)] = turn; 
+		clear(); // Needed to clear stdin. 
+		check(board);
+		return 0;
 	}		
 	errorprint(board); // This also acts to clear stdin buffer.
 	return 0;
