@@ -15,6 +15,10 @@ void set(char *board);
 int checkRow(char *board);
 int checkColumn(char *board);
 int checkFull(char *board);
+int minmax(char *board, int a, char move);
+int EndState(char *board);
+int isLegal(char *board, int a);
+
 char turn = 'X'; // Let's get this global var off into pipelines instead. 
 
 
@@ -22,7 +26,7 @@ char turn = 'X'; // Let's get this global var off into pipelines instead.
 
 int main(int argc, char *argv[])
 {
-    char board[9];
+    char board[10];
 	set(board);
 	return 0;
 }
@@ -139,7 +143,7 @@ int checkDiag(char *board)
 	 }
 	return 0;
 }
-// This function can be made void
+
 int checkFull(char *board)
 {
 	int i;
@@ -158,7 +162,59 @@ int checkFull(char *board)
 	return 0;
 }
 
-// Okay this will allow the AI to stop going once an endstate is reached in our minimax. 
+
+// We could put this call in a for loop? 
+int minmax(char *board, int a, char move)
+{
+	int i;
+	char temp[10];
+	strcpy(temp, board);
+	if(!EndState(temp))
+	{
+		for(i = a; i<9; i++)
+		{
+			if(isLegal(temp, i))
+			{
+				temp[i] = move;
+				move = TOGGLE(move);
+				minmax(temp, i, move);
+			}
+		}
+	}
+	// Three outcomes. Win, lose and draw.
+	else if(checkFull(temp))
+	{
+		return 0;
+	}
+	else if(turn == 'O')
+	{
+		return 100;
+	}
+	else if(turn == 'X')
+	{
+		return -100;
+	}
+	// We just need this return here to satisfy function type. 
+	return 0;
+}
+// Okay so this is where we use the minmax function to determine scores of each node. 
+int AI(char *board)
+{
+}
+	
+
+// Okay our AI needs to know if we can place a move, so this works. 
+int isLegal(char *board, int a)
+{
+	if(board[a] == ' ')
+	{
+		return 1; 
+	}
+	return 0;
+}
+	
+
+// This will allow the AI to stop going once an endstate is reached in our minimax. 
 int EndState(char *board)
 {
 	if( checkRow(board) || checkColumn(board) || checkDiag(board) || checkFull(board))
@@ -184,16 +240,7 @@ void check(char *board)
 }
 
 
-// Okay our AI needs to know if we can place a move, so this works. 
-int isLegal(char *board, int a)
-{
-	if(board[a] == ' ')
-	{
-		return 1; 
-	}
-	return 0;
-}
-	
+
 
 int move(char *board)
 {
@@ -204,7 +251,7 @@ int move(char *board)
 	// Test for boundary (1-3 only for each) and test for legal move
 	if((a < 4 && a > 0) && (b < 4 && b > 0) && (board[((a-1)*3)+(b-1)] == ' ')) 
 	{
-			board[((a-1)*3)+(b-1)]=turn;
+			board[((a-1)*3)+(b-1)] = turn;
 			clear(); // Needed to clear stdin. 
 			check(board);
 			return 0;
