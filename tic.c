@@ -4,45 +4,40 @@
 // Everything but AI finished. 
 
 // Forward Declarations.
-void map();
-int move();
-void errorprint();
+void map(char *board);
+int move(char *board);
+void errorprint(char *board);
 void clear();
-void check();
-void win();
-void play();
-void set();
-int checkRow();
-int checkColumn();
-void checkFull();
-char turn = 'X';
+void check(char *board);
+void win(char *board);
+void play(char *board);
+void set(char *board);
+int checkRow(char *board);
+int checkColumn(char *board);
+int checkFull(char *board);
+char turn = 'X'; // Let's get this global var off into pipelines instead. 
 
-typedef struct{
-				char board[9];
-				STATE *next;
-			  } STATE;
-// So this struct should hold current state and point to next state, like creating node trees. 
-// We should learn a bit more about pointers in this state, hey there's an exercies on C the hardway that uses structs like this. CHECK IT OUT
 
-char board[9];
+
 
 int main(int argc, char *argv[])
 {
-	set();
+    char board[9];
+	set(board);
 	return 0;
 }
 
-void play()
+void play(char *board)
 {
 	while(1)
 	{
-		map();
-		move();
+		map(board);
+		move(board);
 		turn = TOGGLE(turn);
 	}
 }
 
-void map()
+void map(char *board)
 {
 	int i;
 	int j = 1;
@@ -64,33 +59,33 @@ void clear ()
  	 while ( getchar() != '\n' );
 }
 
-void set()
+void set(char *board)
 {
 	int i;
 	for(i = 0; i < 9; i++)
 	{
 		board[i] = ' ';
 	}
-	play();
+	play(board);
 }
 
-void errorprint()
+void errorprint(char *board)
 {
 	printf("That's not a valid move!\n");
 	clear();
-	move(turn);
+    move(board);
 }
 
-void win()
+void win(char *board)
 {
 	char a;
-	map(); // Refresh map with winning move.
+	map(board); // Refresh map with winning move.
 	printf("Would you like to play again? Y/N\n");
 	scanf("%c",&a);
 	if(a == 'Y' || a == 'y')
 	{
 		printf("I challenge you to another duel!\n");
-		set();
+		set(board);
 	}
 	else if(a == 'N' || a == 'n')
 	{
@@ -99,7 +94,7 @@ void win()
 	}
 }
 
-int checkRow()
+int checkRow(char *board)
 {
 	int i, sum;
 	for(i = 0; i < 7; i+=3)
@@ -115,7 +110,7 @@ int checkRow()
 	return 0;
 }
 
-int checkColumn()
+int checkColumn(char *board)
 {
 	int i, sum;
 	// For a column checker, we need to do 0 3 6, 1 4 7, 2 5 8, obviously. 
@@ -130,7 +125,7 @@ int checkColumn()
 	}
 	return 0;
 }
-int checkDiag()
+int checkDiag(char *board)
 {
 	int sum;
  	if(( sum = board[0] + board[4] +  board[8]) == 237 || (sum = board[0] + board[4] +  board[8]) == 264)
@@ -145,7 +140,7 @@ int checkDiag()
 	return 0;
 }
 // This function can be made void
-void checkFull()
+int checkFull(char *board)
 {
 	int i;
 	int sum = 9;
@@ -156,38 +151,56 @@ void checkFull()
 			sum--;
 			if(!sum)
 			{
-				printf("Oh you got a draw! How cute!\n");
-				win();
+				return 1;
 			}
 		}
 	}
+	return 0;
 }
-
-void check() 
+int EndState(char *board)
+{
+	
+void check(char *board) 
 {
 
-		if(checkRow() || checkColumn() || checkDiag())
+		if(checkRow(board) || checkColumn(board) || checkDiag(board))
 		{
 			printf("Wow! Looks like someone won!! I bet it was that sneaky %c!\n", turn);
-			win();
+			win(board);
 		}
-		checkFull(); // Should draw when board is full AND no winning moves. 
+		if(checkFull(board))
+        {
+            printf("\nOh a draw, how cute\n");
+            win(board);
+        } // Should draw when board is full AND no winning moves. 
 }
 
-int move()
+
+// Okay our AI needs to know if we can place a move, so this works. 
+int isLegal(char *board, int a)
 {
-	int a,b;
+	if(board[a] == ' ')
+	{
+		return 1; 
+	}
+	return 0;
+}
+	
+
+int move(char *board)
+{
+	int a, b;
 	// Take in co-ordinates, change board. 
 	printf("It's your move, %c! What move will you make? Row then Column separated by space\n", turn);
 	scanf("%d%d", &a, &b);
 	// Test for boundary (1-3 only for each) and test for legal move
-	if((a < 4 && a > 0) && (b < 4 && b > 0) && (board[((a-1)*3)+(b-1)]== ' '))
+	if((a < 4 && a > 0) && (b < 4 && b > 0) && (board[((a-1)*3)+(b-1)] == ' ')) 
 	{
 			board[((a-1)*3)+(b-1)]=turn;
 			clear(); // Needed to clear stdin. 
-			check();
+			check(board);
 			return 0;
 	}		
-	errorprint(); // This also acts to clear stdin buffer.
+	errorprint(board); // This also acts to clear stdin buffer.
 	return 0;
 }
