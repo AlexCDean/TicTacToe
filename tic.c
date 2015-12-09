@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #define TOGGLE(a) ((a) == ('X')) ? ('O') : ('X') 
+#define LEGAL ((a < 4 && a > 0) && (b < 4 && b > 0) && (board[((a-1)*3)+(b-1)] == ' '))
 // Everything but AI finished. 
 
 // Forward Declarations.
@@ -83,7 +85,6 @@ void errorprint(char *board)
 void win(char *board)
 {
 	char a;
-	map(board); // Refresh map with winning move.
 	printf("Would you like to play again? Y/N\n");
 	scanf("%c",&a);
 	if(a == 'Y' || a == 'y')
@@ -96,6 +97,7 @@ void win(char *board)
 		printf("Goodbye!\n");
 		exit(EXIT_SUCCESS);
 	}
+    win(board);
 }
 
 int checkRow(char *board)
@@ -197,11 +199,11 @@ int minmax(char *board, int a, char move)
 	// We just need this return here to satisfy function type. 
 	return 0;
 }
-// Okay so this is where we use the minmax function to determine scores of each node. 
+/* Okay so this is where we use the minmax function to determine scores of each node. 
 int AI(char *board)
 {
 }
-	
+*/
 
 // Okay our AI needs to know if we can place a move, so this works. 
 int isLegal(char *board, int a)
@@ -230,11 +232,13 @@ void check(char *board)
 		if(checkRow(board) || checkColumn(board) || checkDiag(board))
 		{
 			printf("Wow! Looks like someone won!! I bet it was that sneaky %c!\n", turn);
+            map(board);
 			win(board);
 		}
 		if(checkFull(board))
         {
             printf("\nOh a draw, how cute\n");
+            map(board);
             win(board);
         } // Should draw when board is full AND no winning moves. 
 }
@@ -249,7 +253,7 @@ int move(char *board)
 	printf("It's your move, %c! What move will you make? Row then Column separated by space\n", turn);
 	scanf("%d%d", &a, &b);
 	// Test for boundary (1-3 only for each) and test for legal move
-	if((a < 4 && a > 0) && (b < 4 && b > 0) && (board[((a-1)*3)+(b-1)] == ' ')) 
+	if(LEGAL) 
 	{
 			board[((a-1)*3)+(b-1)] = turn;
 			clear(); // Needed to clear stdin. 
