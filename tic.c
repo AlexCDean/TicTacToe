@@ -157,9 +157,17 @@ int checkFull(char *board)
 	}
 	return 0;
 }
+
+// Okay this will allow the AI to stop going once an endstate is reached in our minimax. 
 int EndState(char *board)
 {
-	
+	if( checkRow(board) || checkColumn(board) || checkDiag(board) || checkFull(board))
+	{
+		return 1;
+	}
+	return 0;
+}
+
 void check(char *board) 
 {
 
