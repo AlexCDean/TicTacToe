@@ -7,39 +7,40 @@
 
 // Forward Declarations.
 void map(char *board);
-int move(char *board);
-void errorprint(char *board);
+int move(char *board, char turn);
+void errorprint(char *board, char turn);
 void clear();
-void check(char *board);
+void check(char *board, char turn);
 void win(char *board);
-void play(char *board);
-void set(char *board);
+void play(char *board, char turn);
+void set(char *board, char turn);
 int checkRow(char *board);
 int checkColumn(char *board);
 int checkFull(char *board);
 int minmax(char *board, int a, char move);
 int EndState(char *board);
 int isLegal(char *board, int a);
+int AI(char *board, char turn);
 
-char turn = 'X'; // Let's get this global var off into pipelines instead. 
+// 1 means X won, 2 means O won. 
 
 
-
-
-int main(int argc, char *argv[])
+int main()
 {
+	char turn = 'X';
     char board[10];
-    set(board);
+    set(board, turn);
     return 0;
 }
 
-void play(char *board)
+void play(char *board, char turn)
 {
     while(1)
 	{
         map(board);
-        move(board);
-        turn = TOGGLE(turn);
+        move(board, turn);
+		turn = TOGGLE(turn);
+		AI(board, turn);
 	}
 }
 
@@ -62,24 +63,24 @@ void map(char *board)
 
 void clear ()
 {    
- 	 while ( getchar() != '\n' );
+ 	 while (getchar() != '\n' );
 }
 
-void set(char *board)
+void set(char *board, char turn)
 {
 	int i;
 	for(i = 0; i < 9; i++)
 	{
 		board[i] = ' ';
 	}
-	play(board);
+	play(board, turn);
 }
 
-void errorprint(char *board)
+void errorprint(char *board, char turn)
 {
 	printf("That's not a valid move!\n");
 	clear();
-    move(board);
+    move(board, turn);
 }
 
 void win(char *board)
@@ -90,7 +91,7 @@ void win(char *board)
 	if(a == 'Y' || a == 'y')
 	{
 		printf("I challenge you to another duel!\n");
-		set(board);
+		main();
 	}
 	else if(a == 'N' || a == 'n')
 	{
@@ -107,9 +108,13 @@ int checkRow(char *board)
  	{
 		// 0 1 2, 3 4 5, 6 7 8. 
 		sum = board[i] + board[i+1] +  board[i+2]; 
-		if(sum == 264 || sum == 237)
+		if(sum == 264)
 		{
 			return 1;
+		}
+		if(sum == 237)
+		{
+			return 2;
 		}
 		sum = 0;
 	 }
@@ -123,9 +128,13 @@ int checkColumn(char *board)
 	for(i = 0; i < 3; i++)
 	{
 		sum = board[i] + board[i+3] + board[i+6];
-		if(sum == 264 || sum == 237)
+		if(sum == 264)
 		{
 			return 1;
+		}
+		if(sum == 237)
+		{
+			return 2;
 		}
 		sum = 0; 
 	}
@@ -134,15 +143,14 @@ int checkColumn(char *board)
 int checkDiag(char *board)
 {
 	int sum;
- 	if(( sum = board[0] + board[4] +  board[8]) == 237 || (sum = board[0] + board[4] +  board[8]) == 264)
+	if( (sum = board[2] + board[4] +  board[6]) == 264 || (sum = board[0] + board[4] +  board[8]) == 264)
+	{
+		return 1;
+	}
+ 	if(( sum = board[0] + board[4] +  board[8]) == 237 || (sum = board[2] + board[4] +  board[6]) == 237)
  	{
-		return 1;
-	 }	
-	 // Diagonal case 2
-	 if(( sum = board[2] + board[4] +  board[6]) == 237 || (sum = board[2] + board[4] +  board[6]) == 264)
-	 {
-		return 1;
-	 }
+		return 2;
+	}	
 	return 0;
 }
 
@@ -185,18 +193,38 @@ int EndState(char *board)
 }
 
 
+
 // We could put this call in a for loop? 
-int minmax(char *board, int a, char move)
+int minmax(char *temp, int a, char move)
 {
 	int i;
-	char temp[10];
-	strcpy(temp, board);
+	if(EndState(temp))
+	{
+		if(checkFull(temp))
+		{
+			map(temp);
+			printf("Draw\n");
+			return 0;
+		}
+		if((checkRow(temp) || checkColumn(temp) || checkDiag(temp)) && (move == 'X'))
+		{
+			map(temp);
+			printf("O won\n");
+			return 100;
+		}
+		if((checkRow(temp) || checkColumn(temp) || checkDiag(temp)) && (move == 'O'))
+		{	
+			map(temp);
+			printf("X won\n");
+			return -100;
+		}
+	}
     // if the board is still good to go, play a move
 	if(!EndState(temp))
 	{
-		for(i = a; i<9; i++)
+		for(i = a; i < 9; i++)
 		{
-			if(isLegal(temp, i))
+			if((isLegal(temp, i)))
 			{
 				temp[i] = move;
 				move = TOGGLE(move);
@@ -204,38 +232,30 @@ int minmax(char *board, int a, char move)
 			}
 		}
 	}
-    // if board is not good to go...
-	// Three outcomes. Win, lose and draw.
-	else if(checkFull(temp))
-	{
-		return 0;
-	}
-	else if(turn == 'O')
-	{
-		return 100;
-	}
-	else if(turn == 'X')
-	{
-		return -100;
-	}
-	// We just need this return here to satisfy function type. 
-	return 0;
 }
-/* Okay so this is where we use the minmax function to determine scores of each node. 
-int AI(char *board)
+// Okay so this is where we use the minmax function to determine scores of each node. 
+int AI(char *board, char turn)
 {
-    
+    int i = 0;
+	char temp[10];
+	strcpy(temp, board);
+	int score;
+	char move = turn;
+	printf("BEEP %c\n", move);
+	score = minmax(temp, i, move);
+	printf("%d\n", score);
+	return 1;
 }
-*/
 
 
-void check(char *board) 
+
+void check(char *board, char turn) 
 {
 
 		if(checkRow(board) || checkColumn(board) || checkDiag(board))
 		{
-			printf("Wow! Looks like someone won!! I bet it was that sneaky %c!\n", turn);
-            map(board);
+			printf("%c Won!\n", turn);
+			map(board);
 			win(board);
 		}
 		if(checkFull(board))
@@ -247,7 +267,7 @@ void check(char *board)
 }
 
 
-int move(char *board)
+int move(char *board, char turn)
 {
 	int a, b;
 	// Take in co-ordinates, change board. 
@@ -259,9 +279,9 @@ int move(char *board)
         // Maths to map player input to actual board position, accounting for zero index
         board[((a-1)*3)+(b-1)] = turn; 
 		clear(); // Needed to clear stdin. 
-		check(board);
+		check(board, turn);
 		return 0;
 	}		
-	errorprint(board); // This also acts to clear stdin buffer.
+	errorprint(board, turn); // This also acts to clear stdin buffer.
 	return 0;
 }
