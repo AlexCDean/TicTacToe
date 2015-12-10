@@ -198,28 +198,8 @@ int EndState(char *board)
 int minmax(char *temp, int a, char move)
 {
 	int i;
-	if(EndState(temp))
-	{
-		if(checkFull(temp))
-		{
-			map(temp);
-			printf("Draw\n");
-			return 0;
-		}
-		if((checkRow(temp) || checkColumn(temp) || checkDiag(temp)) && (move == 'X'))
-		{
-			map(temp);
-			printf("O won\n");
-			return 100;
-		}
-		if((checkRow(temp) || checkColumn(temp) || checkDiag(temp)) && (move == 'O'))
-		{	
-			map(temp);
-			printf("X won\n");
-			return -100;
-		}
-	}
-    // if the board is still good to go, play a move
+//	printf("Numbah %d\n",a);
+	
 	if(!EndState(temp))
 	{
 		for(i = a; i < 9; i++)
@@ -232,6 +212,27 @@ int minmax(char *temp, int a, char move)
 			}
 		}
 	}
+	if(EndState(temp))
+	{
+		if((checkRow(temp) || checkColumn(temp) || checkDiag(temp)) && (move == 'X'))
+		{
+			//map(temp);
+			//printf("O won\n");
+			return 100;
+		}
+		if((checkRow(temp) || checkColumn(temp) || checkDiag(temp)) && (move == 'O'))
+		{	
+			//map(temp);
+			//printf("X won\n");
+			return -100;
+		}
+		if(checkFull(temp))
+		{
+		//	map(temp);
+		//	printf("Draw\n");
+			return 0;
+		}
+	}
 }
 // Okay so this is where we use the minmax function to determine scores of each node. 
 int AI(char *board, char turn)
@@ -241,13 +242,10 @@ int AI(char *board, char turn)
 	strcpy(temp, board);
 	int score;
 	char move = turn;
-	printf("BEEP %c\n", move);
 	score = minmax(temp, i, move);
 	printf("%d\n", score);
 	return 1;
 }
-
-
 
 void check(char *board, char turn) 
 {
