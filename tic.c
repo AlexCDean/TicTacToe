@@ -195,36 +195,36 @@ int EndState(char *board)
 
 
 // We could put this call in a for loop? 
-int minmax(char *temp, int a, char move)
+int minmax(char *board, int a, char move)
 {
-	int i;
-//	printf("Numbah %d\n",a);
-	
-	if(!EndState(temp))
-	{
-		for(i = a; i < 9; i++)
-		{
-			if((isLegal(temp, i)))
+		int i;
+		char temp[10];
+		strcpy(temp, board);
+		//if(!EndState(temp))
+	//	{
+			for(i = a; i < 9 && !EndState(temp); i++)
 			{
-				temp[i] = move;
-				move = TOGGLE(move);
-				minmax(temp, i, move);
+				if((isLegal(temp, i)))
+				{
+					temp[i] = move;
+					move = TOGGLE(move);
+					minmax(temp, 0, move);
+				}
 			}
-		}
-	}
+		//}
 	if(EndState(temp))
 	{
-		if((checkRow(temp) || checkColumn(temp) || checkDiag(temp)) && (move == 'X'))
+		if(((checkRow(temp) == 1)  || (checkColumn(temp) == 1) || (checkDiag(temp)) == 1))
 		{
-			//map(temp);
-			//printf("O won\n");
-			return 100;
-		}
-		if((checkRow(temp) || checkColumn(temp) || checkDiag(temp)) && (move == 'O'))
-		{	
-			//map(temp);
-			//printf("X won\n");
+		//	map(temp);
+		//	printf("X won\n");
 			return -100;
+		}
+		if(((checkRow(temp) == 2)  || (checkColumn(temp) == 2) || (checkDiag(temp)) == 2) )
+		{	
+		//	map(temp);
+		//	printf("O won\n");
+			return 100;
 		}
 		if(checkFull(temp))
 		{
@@ -233,17 +233,27 @@ int minmax(char *temp, int a, char move)
 			return 0;
 		}
 	}
+	map(temp);
+	return 2;
 }
 // Okay so this is where we use the minmax function to determine scores of each node. 
 int AI(char *board, char turn)
 {
     int i = 0;
-	char temp[10];
-	strcpy(temp, board);
-	int score;
+	int score[10];
 	char move = turn;
-	score = minmax(temp, i, move);
-	printf("%d\n", score);
+	for(i = 0; i < 9; i++)
+	{
+		if(isLegal(board,i))
+		{	
+			score[i] = minmax(board, i, move);
+ 			printf("%d  %d\n", i, score[i]);
+		}
+		else if(!isLegal(board,i))
+		{
+			score[i] = -1000;
+		}
+	}
 	return 1;
 }
 
