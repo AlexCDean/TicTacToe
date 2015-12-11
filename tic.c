@@ -216,9 +216,9 @@ int AI(char *board, char turn)
 
 int minmax(char *board, int a, char move)
 {
-		int i;
-		char temp[10];
-		strcpy(temp, board);
+	int i;
+	char temp[10];
+	strcpy(temp, board);
 
 	for(i = a; i < 9 && !EndState(temp); i++)
 	{
@@ -233,26 +233,19 @@ int minmax(char *board, int a, char move)
 	{
 		if(((checkRow(temp) == 1)  || (checkColumn(temp) == 1) || (checkDiag(temp)) == 1))
 		{
-		//	map(temp);
-		//	printf("X won\n");
 			return -100;
 		}
 		if(((checkRow(temp) == 2)  || (checkColumn(temp) == 2) || (checkDiag(temp)) == 2) )
 		{	
-		//	map(temp);
-		//	printf("O won\n");
 			return 100;
 		}
 		if(checkFull(temp))
 		{
-		//	map(temp);
-		//	printf("Draw\n");
 			return 0;
 		}
 	}
+
 	minmax(temp, 0, move);
-	map(temp);
-	return EndState(temp);
 }
 
 
