@@ -22,7 +22,6 @@ int EndState(char *board);
 int isLegal(char *board, int a);
 int AI(char *board, char turn);
 
-// 1 means X won, 2 means O won. 
 
 
 int main()
@@ -198,6 +197,7 @@ int AI(char *board, char turn)
     int i = 0;
 	int score[10];
 	char move = turn;
+
 	for(i = 0; i < 9; i++)
 	{
 		if(isLegal(board,i))
@@ -213,22 +213,12 @@ int AI(char *board, char turn)
 	return 1;
 }
 
-
+// We have to sum up all the trees. 
 int minmax(char *board, int a, char move)
 {
-	int i;
+	int i, j;
 	char temp[10];
 	strcpy(temp, board);
-
-	for(i = a; i < 9 && !EndState(temp); i++)
-	{
-		if((isLegal(temp, i)))
-		{
-			temp[i] = move;
-			move = TOGGLE(move);
-			minmax(temp, 0, move);
-		}
-	}
 	if(EndState(temp))
 	{
 		if(((checkRow(temp) == 1)  || (checkColumn(temp) == 1) || (checkDiag(temp)) == 1))
@@ -244,7 +234,31 @@ int minmax(char *board, int a, char move)
 			return 0;
 		}
 	}
-
+	for(i = a; i < 9 && !EndState(temp); i++)
+	{
+		if(isLegal(temp,i))
+		{	
+			temp[i] = move;
+			move = TOGGLE(move);
+			map(temp);
+			minmax(temp, i, move);
+			i = 0;
+		}
+	}
+	/*for(i = a; i < 9 && !EndState(temp); i++)
+	{
+		temp[i] = move;
+		for(j = 0; j < 9 && !EndState(temp); j++)
+		{
+			if((isLegal(temp, j)))
+			{
+				temp[j] = move;
+				move = TOGGLE(move);
+				map(temp);
+				minmax(temp, i, move);
+			}
+		}
+	}*/
 	minmax(temp, 0, move);
 }
 
