@@ -17,12 +17,12 @@ void set(char *board, char turn);
 int checkRow(char *board);
 int checkColumn(char *board);
 int checkFull(char *board);
-int minmax(char *board, int a, char move);
+int minmax(char *board, char move);
 int EndState(char *board);
 int isLegal(char *board, int a);
 int AI(char *board, char turn);
-
-
+int Score(char *board);
+int getNextState(char *board, char move);
 
 int main()
 {
@@ -107,14 +107,8 @@ int checkRow(char *board)
  	{
 		// 0 1 2, 3 4 5, 6 7 8. 
 		sum = board[i] + board[i+1] +  board[i+2]; 
-		if(sum == 264)
-		{
-			return 1;
-		}
-		if(sum == 237)
-		{
-			return 2;
-		}
+		if(sum == 264) return 1;
+		if(sum == 237) return 2;
 		sum = 0;
 	 }
 	return 0;
@@ -127,14 +121,8 @@ int checkColumn(char *board)
 	for(i = 0; i < 3; i++)
 	{
 		sum = board[i] + board[i+3] + board[i+6];
-		if(sum == 264)
-		{
-			return 1;
-		}
-		if(sum == 237)
-		{
-			return 2;
-		}
+		if(sum == 264) return 1;
+		if(sum == 237) return 2;
 		sum = 0; 
 	}
 	return 0;
@@ -142,14 +130,8 @@ int checkColumn(char *board)
 int checkDiag(char *board)
 {
 	int sum;
-	if( (sum = board[2] + board[4] +  board[6]) == 264 || (sum = board[0] + board[4] +  board[8]) == 264)
-	{
-		return 1;
-	}
- 	if(( sum = board[0] + board[4] +  board[8]) == 237 || (sum = board[2] + board[4] +  board[6]) == 237)
- 	{
-		return 2;
-	}	
+	if( (sum = board[2] + board[4] +  board[6]) == 264 || (sum = board[0] + board[4] +  board[8]) == 264) return 1;
+ 	if(( sum = board[0] + board[4] +  board[8]) == 237 || (sum = board[2] + board[4] +  board[6]) == 237) return 2;
 	return 0;
 }
 
@@ -162,10 +144,7 @@ int checkFull(char *board)
 		if(!(board[i] == ' '))
 		{
 			sum--;
-			if(!sum)
-			{
-                return 1;
-			}
+			if(!sum) return 1;
 		}
 	}
 	return 0;
@@ -173,10 +152,7 @@ int checkFull(char *board)
 // Okay our AI needs to know if we can place a move, so this works. 
 int isLegal(char *board, int a)
 {
-	if(board[a] == ' ')
-	{
-		return 1; 
-	}
+	if(board[a] == ' ') return 1;
 	return 0;
 }
 	
@@ -184,10 +160,7 @@ int isLegal(char *board, int a)
 // This will allow the AI to stop going once an endstate is reached in our minimax. 
 int EndState(char *board)
 {
-	if( checkRow(board) || checkColumn(board) || checkDiag(board) || checkFull(board))
-	{
-		return 1;
-	}
+	if( checkRow(board) || checkColumn(board) || checkDiag(board) || checkFull(board)) return 1;
 	return 0;
 }
 
@@ -195,73 +168,62 @@ int EndState(char *board)
 int AI(char *board, char turn)
 {
     int i = 0;
-	int score[10];
-	char move = turn;
-
-	for(i = 0; i < 9; i++)
-	{
-		if(isLegal(board,i))
-		{	
-			score[i] = minmax(board, i, move);
- 			printf("%d  %d\n", i, score[i]);
-		}
-		else if(!isLegal(board,i))
-		{
-			score[i] = -1000;
-		}
-	}
+	int score;
+	score = minmax(board,  turn);
 	return 1;
 }
 
-// We have to sum up all the trees. 
-int minmax(char *board, int a, char move)
+// Let's just make a getnewstate function. Assume we pass a temp board.
+
+int getNextState(char *board, char move)
 {
-	int i, j;
-	char temp[10];
-	strcpy(temp, board);
-	if(EndState(temp))
+	int i, score = -500;
+	if(EndState(board)) return Score(board);
+	for(i = 0; i < 9; i++)
 	{
-		if(((checkRow(temp) == 1)  || (checkColumn(temp) == 1) || (checkDiag(temp)) == 1))
-		{
-			return -100;
-		}
-		if(((checkRow(temp) == 2)  || (checkColumn(temp) == 2) || (checkDiag(temp)) == 2) )
+		if(score > -500) return score;
+		if(isLegal(board, i))
 		{	
-			return 100;
-		}
-		if(checkFull(temp))
-		{
-			return 0;
-		}
+			board[i] = move;
+			move = TOGGLE(move);		
+			score = getNextState(board, move);
+			map(board);
+			board[i] = ' ';
+			if(score > -500) return score;
+		}	
 	}
-	for(i = a; i < 9 && !EndState(temp); i++)
-	{
-		if(isLegal(temp,i))
-		{	
-			temp[i] = move;
-			move = TOGGLE(move);
-			map(temp);
-			minmax(temp, i, move);
-			i = 0;
-		}
-	}
-	/*for(i = a; i < 9 && !EndState(temp); i++)
-	{
-		temp[i] = move;
-		for(j = 0; j < 9 && !EndState(temp); j++)
-		{
-			if((isLegal(temp, j)))
-			{
-				temp[j] = move;
-				move = TOGGLE(move);
-				map(temp);
-				minmax(temp, i, move);
-			}
-		}
-	}*/
-	minmax(temp, 0, move);
+	return score; 
 }
 
+int minmax(char *board, char move)
+{
+	int i;
+	char temp[10];
+	strcpy(temp, board);
+	int score = -500;
+	// if game is over, return score. 
+	if(EndState(temp)) return Score(temp);
+	// Else play for first position, then that tree. 
+	for(i = 0; i < 9; i++)
+	{
+		if(isLegal(temp, i))
+		{
+			temp[i] = move;
+			move = TOGGLE(move);
+			score =	getNextState(temp, move);
+		//	if(score > -500) return score;
+			temp[i] = ' ';
+		}
+	}
+	return score;
+}
+
+int Score(char *temp)
+{
+	if(((checkRow(temp) == 1)  || (checkColumn(temp) == 1) || (checkDiag(temp)) == 1)) return -100;
+	if(((checkRow(temp) == 2)  || (checkColumn(temp) == 2) || (checkDiag(temp)) == 2)) return 100;
+	if(checkFull(temp)) return 0;
+}
 
 void check(char *board, char turn) 
 {
