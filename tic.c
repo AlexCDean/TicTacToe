@@ -7,12 +7,12 @@
 
 // Forward Declarations.
 void map(char *board);
-int move(char *board, char turn);
-void errorprint(char *board, char turn);
+int move(char *board);
+void errorprint(char *board);
 void clear();
-void check(char *board, char turn);
+void check(char *board);
 void win(char *board);
-void play(char *board, char turn);
+void play(char *board);
 void set(char *board, char turn);
 int checkRow(char *board);
 int checkColumn(char *board);
@@ -20,7 +20,7 @@ int checkFull(char *board);
 int minmax(char *board, char move);
 int EndState(char *board);
 int isLegal(char *board, int a);
-int AI(char *board, char turn);
+void AI(char *board);
 int Score(char *board);
 int getNextState(char *board, char move);
 
@@ -32,14 +32,13 @@ int main()
     return 0;
 }
 
-void play(char *board, char turn)
+void play(char *board)
 {
     while(1)
 	{
         map(board);
-        move(board, turn);
-		turn = TOGGLE(turn);
-		AI(board, turn);
+        move(board);
+		AI(board);
 	}
 }
 
@@ -72,14 +71,14 @@ void set(char *board, char turn)
 	{
 		board[i] = ' ';
 	}
-	play(board, turn);
+	play(board);
 }
 
-void errorprint(char *board, char turn)
+void errorprint(char *board)
 {
 	printf("That's not a valid move!\n");
 	clear();
-    move(board, turn);
+    move(board);
 }
 
 void win(char *board)
@@ -165,58 +164,82 @@ int EndState(char *board)
 }
 
 // Okay so this is where we use the minmax function to determine scores of each node. 
-int AI(char *board, char turn)
+void AI(char *board)
 {
-    int i = 0;
-	int score;
-	score = minmax(board,  turn);
-	return 1;
-}
-
-// Let's just make a getnewstate function. Assume we pass a temp board.
-
-int getNextState(char *board, char move)
-{
-	int i, score = -500;
-	if(EndState(board)) return Score(board);
+    int i, index = 0;
+	int j = -10000;
+	int score[10]= {-200, -200, -200, -200, -200, -200, -200, -200, -200, -200};// consider this score as "No move"
 	for(i = 0; i < 9; i++)
 	{
-		if(score > -500) return score;
 		if(isLegal(board, i))
-		{	
-			board[i] = move;
-			move = TOGGLE(move);		
-			score = getNextState(board, move);
-			map(board);
+		{
+			board[i] = 'O'; // That's us
+			score[i] = minmax(board, 'X'); // What will the opponent do? 
 			board[i] = ' ';
-			if(score > -500) return score;
-		}	
+		}
 	}
-	return score; 
+	for(i = 0; i < 9; i++)
+	{
+		if(score[i] > j && isLegal(board, i))
+		{
+			j = score[i];
+			index = i;
+		}
+		printf("Score for position %i is %i, largest is %i at %i\n", i, score[i],j, index );
+	}
+	if(isLegal(board, index))
+	{
+		board[index] = 'O';
+		check(board);
+	}
+	
 }
 
 int minmax(char *board, char move)
 {
 	int i;
 	char temp[10];
-	strcpy(temp, board);
-	int score = -500;
+	strcpy(temp, board); // We don't want to affect the actual board.
+	int score = -200; // Again, our no action score. 
 	// if game is over, return score. 
-	if(EndState(temp)) return Score(temp);
+	if(EndState(temp)) return Score(temp); // Catch condition.
 	// Else play for first position, then that tree. 
 	for(i = 0; i < 9; i++)
 	{
 		if(isLegal(temp, i))
 		{
-			temp[i] = move;
-			move = TOGGLE(move);
-			score =	getNextState(temp, move);
-		//	if(score > -500) return score;
+			temp[i] = move; // Play this move, opponent or us. 
+			move = TOGGLE(move); // Change it, back to us or opponent. 
+			score += getNextState(temp, move); // What is the tree like?
 			temp[i] = ' ';
 		}
 	}
 	return score;
 }
+
+// Let's just make a getnewstate function.
+
+int getNextState(char *board, char move)
+{
+	int i, score = -200;
+	char temp[10]; // See minmax
+	strcpy(temp, board);
+	if(EndState(board)) return Score(board);
+	for(i = 0; i < 9; i++)
+	{
+		if(score > -199) return score; // Don't want to risk it yet. 
+		if(isLegal(board, i))
+		{	
+			temp[i] = move; // Play the next move
+			move = TOGGLE(move); // Change turn
+			score += getNextState(temp, move); // Recursive yet? 
+			temp[i] = ' '; // Remove our play, go to the next position
+			if(score > -199) return score;
+		}	
+	}
+	return score; 
+}
+
 
 int Score(char *temp)
 {
@@ -225,39 +248,46 @@ int Score(char *temp)
 	if(checkFull(temp)) return 0;
 }
 
-void check(char *board, char turn) 
+void check(char *board) 
 {
 
-		if(checkRow(board) || checkColumn(board) || checkDiag(board))
+		if(checkRow(board) == 1 || checkColumn(board) == 1|| checkDiag(board) == 1 )
 		{
-			printf("%c Won!\n", turn);
+			printf("\nYou won!\n");
 			map(board);
 			win(board);
 		}
-		if(checkFull(board))
+		else if(checkRow(board) == 2 || checkColumn(board) == 2|| checkDiag(board) == 1)
+		{
+			printf("\nYou lost! To me! A computer! Mwuahahaha!\n");
+			map(board);
+			win(board);
+		}
+		else if(checkFull(board))
         {
             printf("\nOh a draw, how cute\n");
             map(board);
             win(board);
         } 
+		
 }
 
 
-int move(char *board, char turn)
+int move(char *board)
 {
 	int a, b;
 	// Take in co-ordinates, change board. 
-	printf("It's your move, %c! What move will you make? Row then Column separated by space\n", turn);
+	printf("It's your move! What move will you make? Row then Column separated by space\n");
 	scanf("%d%d", &a, &b);
 	// Test for boundary (1-3 only for each) and test for legal move
 	if(LEGAL) 
 	{
         // Maths to map player input to actual board position, accounting for zero index
-        board[((a-1)*3)+(b-1)] = turn; 
+        board[((a-1)*3)+(b-1)] = 'X'; 
 		clear(); // Needed to clear stdin. 
-		check(board, turn);
+		check(board);
 		return 0;
 	}		
-	errorprint(board, turn); // This also acts to clear stdin buffer.
+	errorprint(board); // This also acts to clear stdin buffer.
 	return 0;
 }
