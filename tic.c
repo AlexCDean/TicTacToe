@@ -230,7 +230,6 @@ int getNextState(char *board, char move)
 	{
 		if(isLegal(board, i))
 		{	
-			//map(temp);
 			temp[i] = move; // Play the next move
 			move = TOGGLE(move); // Change turn
 			score = getNextState(temp, move); // Recursive yet? 
@@ -245,7 +244,7 @@ int getNextState(char *board, char move)
 
 int Score(char *temp)
 {
-	if(((checkRow(temp) == 1)  || (checkColumn(temp) == 1) || (checkDiag(temp)) == 1)) return 0;
+	if(((checkRow(temp) == 1)  || (checkColumn(temp) == 1) || (checkDiag(temp)) == 1)) return -100;
 	if(((checkRow(temp) == 2)  || (checkColumn(temp) == 2) || (checkDiag(temp)) == 2)) return 200;
 	if(checkFull(temp)) return 100;
 }
