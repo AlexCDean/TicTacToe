@@ -168,7 +168,7 @@ void AI(char *board)
 {
     int i, index = 0;
 	int j = -10000;
-	int score[10]= {-200, -200, -200, -200, -200, -200, -200, -200, -200, -200};// consider this score as "No move"
+	int score[10]= {0};
 	for(i = 0; i < 9; i++)
 	{
 		if(isLegal(board, i))
@@ -200,7 +200,7 @@ int minmax(char *board, char move)
 	int i;
 	char temp[10];
 	strcpy(temp, board); // We don't want to affect the actual board.
-	int score = -200; // Again, our no action score. 
+	int score = 0;; // Again, our no action score. 
 	// if game is over, return score. 
 	if(EndState(temp)) return Score(temp); // Catch condition.
 	// Else play for first position, then that tree. 
@@ -211,6 +211,7 @@ int minmax(char *board, char move)
 			temp[i] = move; // Play this move, opponent or us. 
 			move = TOGGLE(move); // Change it, back to us or opponent. 
 			score += getNextState(temp, move); // What is the tree like?
+			move = TOGGLE(move);
 			temp[i] = ' ';
 		}
 	}
@@ -221,20 +222,21 @@ int minmax(char *board, char move)
 
 int getNextState(char *board, char move)
 {
-	int i, score = -200;
+	int i, score = -100;
 	char temp[10]; // See minmax
 	strcpy(temp, board);
 	if(EndState(board)) return Score(board);
 	for(i = 0; i < 9; i++)
 	{
-		if(score > -199) return score; // Don't want to risk it yet. 
 		if(isLegal(board, i))
 		{	
+			//map(temp);
 			temp[i] = move; // Play the next move
 			move = TOGGLE(move); // Change turn
-			score += getNextState(temp, move); // Recursive yet? 
+			score = getNextState(temp, move); // Recursive yet? 
+			move = TOGGLE(move);
 			temp[i] = ' '; // Remove our play, go to the next position
-			if(score > -199) return score;
+			if(score > -100) return score;
 		}	
 	}
 	return score; 
@@ -243,9 +245,9 @@ int getNextState(char *board, char move)
 
 int Score(char *temp)
 {
-	if(((checkRow(temp) == 1)  || (checkColumn(temp) == 1) || (checkDiag(temp)) == 1)) return -100;
-	if(((checkRow(temp) == 2)  || (checkColumn(temp) == 2) || (checkDiag(temp)) == 2)) return 100;
-	if(checkFull(temp)) return 0;
+	if(((checkRow(temp) == 1)  || (checkColumn(temp) == 1) || (checkDiag(temp)) == 1)) return 0;
+	if(((checkRow(temp) == 2)  || (checkColumn(temp) == 2) || (checkDiag(temp)) == 2)) return 200;
+	if(checkFull(temp)) return 100;
 }
 
 void check(char *board) 
@@ -269,9 +271,7 @@ void check(char *board)
             map(board);
             win(board);
         } 
-		
 }
-
 
 int move(char *board)
 {
