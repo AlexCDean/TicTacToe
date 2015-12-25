@@ -185,7 +185,7 @@ void AI(char *board)
 			j = score[i];
 			index = i;
 		}
-		printf("Score for position %i is %i, largest is %i at %i\n", i, score[i],j, index );
+	//	printf("Score for position %i is %i, largest is %i at %i\n", i, score[i],j, index );
 	}
 	if(isLegal(board, index))
 	{
@@ -258,7 +258,7 @@ void check(char *board)
 			map(board);
 			win(board);
 		}
-		else if(checkRow(board) == 2 || checkColumn(board) == 2|| checkDiag(board) == 1)
+		else if(checkRow(board) == 2 || checkColumn(board) == 2|| checkDiag(board) == 2)
 		{
 			printf("\nYou lost! To me! A computer! Mwuahahaha!\n");
 			map(board);
@@ -277,7 +277,7 @@ int move(char *board)
 	int a, b;
 	// Take in co-ordinates, change board. 
 	printf("It's your move! What move will you make? Row then Column separated by space\n");
-	scanf("%d%d", &a, &b);
+	scanf("%d%d", &a, &b); 
 	// Test for boundary (1-3 only for each) and test for legal move
 	if(LEGAL) 
 	{
