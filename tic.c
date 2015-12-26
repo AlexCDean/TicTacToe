@@ -174,6 +174,7 @@ void AI(char *board)
 		if(isLegal(board, i))
 		{
 			board[i] = 'O'; // That's us
+	//		map(board);
 			score[i] = minmax(board, 'X'); // What will the opponent do? 
 			board[i] = ' ';
 		}
@@ -200,7 +201,7 @@ int minmax(char *board, char move)
 	int i;
 	char temp[10];
 	strcpy(temp, board); // We don't want to affect the actual board.
-	int score = 0;; // Again, our no action score. 
+	int score = -500;; // Again, our no action score. 
 	// if game is over, return score. 
 	if(EndState(temp)) return Score(temp); // Catch condition.
 	// Else play for first position, then that tree. 
@@ -209,6 +210,7 @@ int minmax(char *board, char move)
 		if(isLegal(temp, i))
 		{
 			temp[i] = move; // Play this move, opponent or us. 
+	//		map(temp);
 			move = TOGGLE(move); // Change it, back to us or opponent. 
 			score += getNextState(temp, move); // What is the tree like?
 			move = TOGGLE(move);
@@ -222,7 +224,7 @@ int minmax(char *board, char move)
 
 int getNextState(char *board, char move)
 {
-	int i, score = -100;
+	int i, score = -500;
 	char temp[10]; // See minmax
 	strcpy(temp, board);
 	if(EndState(board)) return Score(board);
@@ -231,6 +233,7 @@ int getNextState(char *board, char move)
 		if(isLegal(board, i))
 		{	
 			temp[i] = move; // Play the next move
+		//	map(temp);
 			move = TOGGLE(move); // Change turn
 			score = getNextState(temp, move); // Recursive yet? 
 			move = TOGGLE(move);
