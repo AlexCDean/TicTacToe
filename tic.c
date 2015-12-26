@@ -3,7 +3,7 @@
 #include <string.h>
 #define TOGGLE(a) ((a) == ('X')) ? ('O') : ('X') 
 #define LEGAL ((a < 4 && a > 0) && (b < 4 && b > 0) && (board[((a-1)*3)+(b-1)] == ' '))
-// Everything but AI finished. 
+// Everything is implemented, next up is a GUI. 
 
 // Forward Declarations.
 void map(char *board);
@@ -174,7 +174,6 @@ void AI(char *board)
 		if(isLegal(board, i))
 		{
 			board[i] = 'O'; // That's us
-	//		map(board);
 			score[i] = minmax(board, 'X'); // What will the opponent do? 
 			board[i] = ' ';
 		}
@@ -210,7 +209,6 @@ int minmax(char *board, char move)
 		if(isLegal(temp, i))
 		{
 			temp[i] = move; // Play this move, opponent or us. 
-	//		map(temp);
 			move = TOGGLE(move); // Change it, back to us or opponent. 
 			score += getNextState(temp, move); // What is the tree like?
 			move = TOGGLE(move);
@@ -233,7 +231,6 @@ int getNextState(char *board, char move)
 		if(isLegal(board, i))
 		{	
 			temp[i] = move; // Play the next move
-		//	map(temp);
 			move = TOGGLE(move); // Change turn
 			score = getNextState(temp, move); // Recursive yet? 
 			move = TOGGLE(move);
