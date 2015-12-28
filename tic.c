@@ -164,32 +164,41 @@ int EndState(char *board)
 }
 
 // Okay so this is where we use the minmax function to determine scores of each node. 
+// hardcoded a tactical strategy, if centre position is open then take it regardless. 
 void AI(char *board)
 {
     int i, index = 0;
 	int j = -10000;
 	int score[10]= {0};
-	for(i = 0; i < 9; i++)
-	{
-		if(isLegal(board, i))
+	if(board[4] != ' ')
+	{	
+		for(i = 0; i < 9; i++)
 		{
-			board[i] = 'O'; // That's us
-			score[i] = minmax(board, 'X'); // What will the opponent do? 
-			board[i] = ' ';
+			if(isLegal(board, i))
+			{
+				board[i] = 'O'; // That's us
+				score[i] = minmax(board, 'X'); // What will the opponent do? 
+				board[i] = ' ';
+			}
+		}	
+		for(i = 0; i < 9; i++)
+		{
+			if(score[i] > j && isLegal(board, i))
+			{
+				j = score[i];
+				index = i;
+			}
+		//	printf("Score for position %i is %i, largest is %i at %i\n", i, score[i],j, index );
+		}
+		if(isLegal(board, index))
+		{
+			board[index] = 'O';
+			check(board);
 		}
 	}
-	for(i = 0; i < 9; i++)
+	else if(board[4] == ' ')
 	{
-		if(score[i] > j && isLegal(board, i))
-		{
-			j = score[i];
-			index = i;
-		}
-	//	printf("Score for position %i is %i, largest is %i at %i\n", i, score[i],j, index );
-	}
-	if(isLegal(board, index))
-	{
-		board[index] = 'O';
+		board[4] = 'O';
 		check(board);
 	}
 	
