@@ -4,7 +4,9 @@
 #define TOGGLE(a) ((a) == ('X')) ? ('O') : ('X') 
 #define LEGAL ((a < 4 && a > 0) && (b < 4 && b > 0) && (board[((a-1)*3)+(b-1)] == ' '))
 // Everything is implemented, next up is a GUI. 
-
+// Note:Minmax has alpha-beta esque pruning, but needs to keep track of scores 
+//	and select min/max as appropiate. So keep track of node type, and score.
+// funcs to imp.: Min(), Max(). 
 // Forward Declarations.
 void map(char *board);
 int move(char *board);
@@ -13,7 +15,7 @@ void clear();
 void check(char *board);
 void win(char *board);
 void play(char *board);
-void set(char *board, char turn);
+void set(char *board);
 int checkRow(char *board);
 int checkColumn(char *board);
 int checkFull(char *board);
@@ -26,10 +28,12 @@ int getNextState(char *board, char move);
 
 int main()
 {
-	char turn = 'X';
-    char board[10];
-    set(board, turn);
-    return 0;
+	// Board has been fed a pre-set map for test. 
+	// Decomment set() if a clean one is needed.
+	char board[10] = { ' ', ' ', 'O', 'O', 'X', 'X', ' ', ' ', ' '};
+    //	set(board);
+    	play(board);
+	return 0;
 }
 
 void play(char *board)
@@ -64,21 +68,20 @@ void clear ()
  	 while (getchar() != '\n' );
 }
 
-void set(char *board, char turn)
+void set(char *board)
 {
 	int i;
 	for(i = 0; i < 9; i++)
 	{
 		board[i] = ' ';
 	}
-	play(board);
 }
 
 void errorprint(char *board)
 {
 	printf("That's not a valid move!\n");
 	clear();
-    move(board);
+	move(board);
 }
 
 void win(char *board)
@@ -96,6 +99,7 @@ void win(char *board)
 		printf("Goodbye!\n");
 		exit(EXIT_SUCCESS);
 	}
+	clear();
     win(board);
 }
 
@@ -164,19 +168,18 @@ int EndState(char *board)
 }
 
 // Okay so this is where we use the minmax function to determine scores of each node. 
-// hardcoded a tactical strategy, if centre position is open then take it regardless. 
 void AI(char *board)
 {
     int i, index = 0;
 	int j = -10000;
 	int score[10]= {0};
-	if(board[4] != ' ')
-	{	
+
 		for(i = 0; i < 9; i++)
 		{
 			if(isLegal(board, i))
 			{
 				board[i] = 'O'; // That's us
+				map(board);
 				score[i] = minmax(board, 'X'); // What will the opponent do? 
 				board[i] = ' ';
 			}
@@ -188,14 +191,12 @@ void AI(char *board)
 				j = score[i];
 				index = i;
 			}
-		//	printf("Score for position %i is %i, largest is %i at %i\n", i, score[i],j, index );
 		}
 		if(isLegal(board, index))
 		{
 			board[index] = 'O';
 			check(board);
 		}
-	}
 	else if(board[4] == ' ')
 	{
 		board[4] = 'O';
@@ -218,6 +219,7 @@ int minmax(char *board, char move)
 		if(isLegal(temp, i))
 		{
 			temp[i] = move; // Play this move, opponent or us. 
+			map(temp);
 			move = TOGGLE(move); // Change it, back to us or opponent. 
 			score += getNextState(temp, move); // What is the tree like?
 			move = TOGGLE(move);
@@ -227,7 +229,7 @@ int minmax(char *board, char move)
 	return score;
 }
 
-// Let's just make a getnewstate function.
+// This getNextState function 
 
 int getNextState(char *board, char move)
 {
@@ -240,6 +242,7 @@ int getNextState(char *board, char move)
 		if(isLegal(board, i))
 		{	
 			temp[i] = move; // Play the next move
+			map(temp);
 			move = TOGGLE(move); // Change turn
 			score = getNextState(temp, move); // Recursive yet? 
 			move = TOGGLE(move);
