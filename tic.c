@@ -4,9 +4,7 @@
 #define TOGGLE(a) ((a) == ('X')) ? ('O') : ('X') 
 #define LEGAL ((a < 4 && a > 0) && (b < 4 && b > 0) && (board[((a-1)*3)+(b-1)] == ' '))
 // Everything is implemented, next up is a GUI. 
-// Note:Minmax has alpha-beta esque pruning, but needs to keep track of scores 
-//	and select min/max as appropiate. So keep track of node type, and score.
-// funcs to imp.: Min(), Max(). 
+ 
 // Forward Declarations.
 void map(char *board);
 int move(char *board);
@@ -223,7 +221,6 @@ int minmax(char *board, char move)
 	return score;
 }
 
-// This getNextState function 
 
 int getNextState(char *board, char move, int depth)
 {
@@ -241,7 +238,7 @@ int getNextState(char *board, char move, int depth)
 			score = getNextState(temp, move, ++depth); // Recursive yet? 
 			move = TOGGLE(move);
 			temp[i] = ' '; // Remove our play, go to the next position
-			if(score > -100) return score;
+			if(score > -100) return score; // Prunes branches. 
 		}	
 	}
 	return score; 
