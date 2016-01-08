@@ -24,14 +24,14 @@ int EndState(char *board);
 int isLegal(char *board, int a);
 void AI(char *board);
 int Score(char *board);
-int getNextState(char *board, char move);
+int getNextState(char *board, char move, int depth);
 
 int main()
 {
 	// Board has been fed a pre-set map for test. 
 	// Decomment set() if a clean one is needed.
 	char board[10] = { ' ', ' ', 'O', 'O', 'X', 'X', ' ', ' ', ' '};
-    //	set(board);
+	set(board);
     	play(board);
 	return 0;
 }
@@ -179,7 +179,7 @@ void AI(char *board)
 			if(isLegal(board, i))
 			{
 				board[i] = 'O'; // That's us
-				map(board);
+		//		map(board);
 				score[i] = minmax(board, 'X'); // What will the opponent do? 
 				board[i] = ' ';
 			}
@@ -197,12 +197,6 @@ void AI(char *board)
 			board[index] = 'O';
 			check(board);
 		}
-	else if(board[4] == ' ')
-	{
-		board[4] = 'O';
-		check(board);
-	}
-	
 }
 
 int minmax(char *board, char move)
@@ -219,9 +213,9 @@ int minmax(char *board, char move)
 		if(isLegal(temp, i))
 		{
 			temp[i] = move; // Play this move, opponent or us. 
-			map(temp);
+		//	map(temp);
 			move = TOGGLE(move); // Change it, back to us or opponent. 
-			score += getNextState(temp, move); // What is the tree like?
+			score += getNextState(temp, move, 1); // What is the tree like?
 			move = TOGGLE(move);
 			temp[i] = ' ';
 		}
@@ -231,20 +225,20 @@ int minmax(char *board, char move)
 
 // This getNextState function 
 
-int getNextState(char *board, char move)
+int getNextState(char *board, char move, int depth)
 {
 	int i, score = -500;
 	char temp[10]; // See minmax
 	strcpy(temp, board);
-	if(EndState(board)) return Score(board);
+	if(EndState(board)) return (Score(board)-depth);
 	for(i = 0; i < 9; i++)
 	{
 		if(isLegal(board, i))
 		{	
 			temp[i] = move; // Play the next move
-			map(temp);
+			//map(temp);
 			move = TOGGLE(move); // Change turn
-			score = getNextState(temp, move); // Recursive yet? 
+			score = getNextState(temp, move, ++depth); // Recursive yet? 
 			move = TOGGLE(move);
 			temp[i] = ' '; // Remove our play, go to the next position
 			if(score > -100) return score;
@@ -256,7 +250,7 @@ int getNextState(char *board, char move)
 
 int Score(char *temp)
 {
-	if(((checkRow(temp) == 1)  || (checkColumn(temp) == 1) || (checkDiag(temp)) == 1)) return -100;
+	if(((checkRow(temp) == 1)  || (checkColumn(temp) == 1) || (checkDiag(temp)) == 1)) return -200;
 	if(((checkRow(temp) == 2)  || (checkColumn(temp) == 2) || (checkDiag(temp)) == 2)) return 200;
 	if(checkFull(temp)) return 100;
 }
@@ -277,11 +271,11 @@ void check(char *board)
 			win(board);
 		}
 		else if(checkFull(board))
-        {
-            printf("\nOh a draw, how cute\n");
-            map(board);
-            win(board);
-        } 
+      		{
+       			printf("\nOh a draw, how cute\n");
+		        map(board);
+		        win(board);
+      		} 
 }
 
 int move(char *board)
@@ -293,8 +287,8 @@ int move(char *board)
 	// Test for boundary (1-3 only for each) and test for legal move
 	if(LEGAL) 
 	{
-        // Maths to map player input to actual board position, accounting for zero index
-        board[((a-1)*3)+(b-1)] = 'X'; 
+		// Maths to map player input to actual board position, accounting for zero index
+		board[((a-1)*3)+(b-1)] = 'X'; 
 		clear(); // Needed to clear stdin. 
 		check(board);
 		return 0;
