@@ -2,14 +2,12 @@
 #include <stdio.h>
 #include <string.h>
 #define TOGGLE(a) ((a) == ('X')) ? ('O') : ('X') 
-// Global
+// Global variables
 GtkBuilder *builder;
 
 
-
+// Forward declarations
 void check(char *board);
-
-
 void set(char *board);
 int checkRow(char *board);
 int checkColumn(char *board);
@@ -27,32 +25,31 @@ static void ButtonChange(GtkButton *button, char *M);
 
 int main (void)
 {
-
-  GObject *window;
-  GObject *button;
-  int i;
-  char board[10];
+  	GObject *window;
+  	GObject *button;
+  	int i;
+  	char board[10];
  
-  gtk_init (NULL, NULL);
-  char buff[8];
-  /* Construct a GtkBuilder instance and load our UI description */
-  builder = gtk_builder_new ();
-  gtk_builder_add_from_file(builder, "builder.ui", NULL);
-  /* Connect signal handlers to the constructed widgets. */
-  window = gtk_builder_get_object(builder, "window");
-  g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
-  ButtonSet(board);
-  for(i = 0; i < 9; i++)
-  {
-	sprintf(buff, "button%d", i);
-	button = gtk_builder_get_object(builder, buff);
-	g_signal_connect(button, "clicked", G_CALLBACK(ButtonMove), (board+i));
-  }
+  	gtk_init (NULL, NULL);
+  	char buff[8]; // Array to hold button names
+  	/* Construct a GtkBuilder instance and load our UI description */
+  	builder = gtk_builder_new ();
+  	gtk_builder_add_from_file(builder, "builder.ui", NULL);
+  	/* Connect signal handlers to the constructed widgets. */
+  	window = gtk_builder_get_object(builder, "window");
+  	g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
+  	ButtonSet(board);
+  	for(i = 0; i < 9; i++)
+  	{
+		sprintf(buff, "button%d", i);
+		button = gtk_builder_get_object(builder, buff);
+		g_signal_connect(button, "clicked", G_CALLBACK(ButtonMove), (board+i));
+ 	}
   
-  button = gtk_builder_get_object (builder, "quit");
-  g_signal_connect (button, "clicked", G_CALLBACK (gtk_main_quit), NULL);
+ 	button = gtk_builder_get_object (builder, "quit");
+ 	g_signal_connect (button, "clicked", G_CALLBACK (gtk_main_quit), NULL);
 
-  gtk_main();
+ 	gtk_main();
 
   return 0;
 }
@@ -131,14 +128,14 @@ void AI(char *board)
 	int j = -10000;
 	int score[10]= {0};
 
-		for(i = 0; i < 9; i++)
+	for(i = 0; i < 9; i++)
+	{
+		if(isLegal(board, i))
 		{
-			if(isLegal(board, i))
-			{
-				board[i] = 'O'; // That's us
-				score[i] = minmax(board, 'X'); // What will the opponent do? 
-				board[i] = ' ';
-			}
+			board[i] = 'O'; // That's us
+			score[i] = minmax(board, 'X'); // What will the opponent do? 
+			board[i] = ' ';
+		}
 		}	
 		for(i = 0; i < 9; i++)
 		{
@@ -215,24 +212,18 @@ void check(char *board)
 {
 	GObject *window = gtk_builder_get_object(builder, "window");
 
-		if(checkRow(board) == 1 || checkColumn(board) == 1|| checkDiag(board) == 1 )
-		{
-
-			quick_message(GTK_WINDOW(window), "You won! Play again?", board);
-
-		}
-		else if(checkRow(board) == 2 || checkColumn(board) == 2|| checkDiag(board) == 2)
-		{
-
-			quick_message(GTK_WINDOW(window), "You lose! Play again?", board);
-
-		}
-		else if(checkFull(board))
-      		{
-
-       			quick_message(GTK_WINDOW(window), "Draw! Play again?", board);
-
-      		} 
+	if(checkRow(board) == 1 || checkColumn(board) == 1|| checkDiag(board) == 1 )
+	{
+		quick_message(GTK_WINDOW(window), "You won! Play again?", board);
+	}
+	else if(checkRow(board) == 2 || checkColumn(board) == 2|| checkDiag(board) == 2)
+	{
+		quick_message(GTK_WINDOW(window), "You lose! Play again?", board);
+	}
+	else if(checkFull(board))
+   	{
+		quick_message(GTK_WINDOW(window), "Draw! Play again?", board);
+	} 
 }
 
 
@@ -243,40 +234,31 @@ static void ButtonChange(GtkButton *button, char *M)
 
 void quick_message(GtkWindow *parent, gchar *message, char *board)
 {
- GtkWidget *dialog, *label, *content_area;
- GtkDialogFlags flags;
+	GtkWidget *dialog, *label, *content_area;
+	GtkDialogFlags flags;
  
- // Create the widgets
- flags = GTK_DIALOG_DESTROY_WITH_PARENT;
- dialog = gtk_dialog_new_with_buttons ("Message",
-                                       parent,
-                                       flags,
-                                       ("Yes!"),
-                                       GTK_RESPONSE_ACCEPT,
-                                       ("No!"),
-                                       GTK_RESPONSE_REJECT,
-                                       NULL);
- content_area = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
- label = gtk_label_new (message);
+	// Create the widgets
+	flags = GTK_DIALOG_DESTROY_WITH_PARENT;
+	dialog = gtk_dialog_new_with_buttons ("Message", parent, flags, ("Yes!"), GTK_RESPONSE_ACCEPT, ("No!"), GTK_RESPONSE_REJECT, NULL);
+	content_area = gtk_dialog_get_content_area (GTK_DIALOG(dialog));
+	label = gtk_label_new (message);
  
- // Add the label, and show everything we’ve added
- gtk_container_add(GTK_CONTAINER(content_area), label);
- gtk_widget_show_all(dialog);
+	// Add the label, and show everything we’ve added
+	gtk_container_add(GTK_CONTAINER(content_area), label);
+	gtk_widget_show_all(dialog);
 
- gint result = gtk_dialog_run (GTK_DIALOG(dialog));
- switch (result)
- {
-    case GTK_RESPONSE_ACCEPT:
-	ButtonSet(board);
-	gtk_widget_destroy(dialog);
-        break;
-    default:
-	gtk_widget_destroy (dialog);
-	gtk_main_quit();
-       break;
- }
-
- 
+	gint result = gtk_dialog_run (GTK_DIALOG(dialog));
+	switch (result)
+	{
+		case GTK_RESPONSE_ACCEPT:
+			ButtonSet(board);
+			gtk_widget_destroy(dialog);
+	        	break;
+		default:
+			gtk_widget_destroy (dialog);
+			gtk_main_quit();
+		       break;
+	}
 }
                           
 
