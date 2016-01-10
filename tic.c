@@ -40,7 +40,7 @@ void play(char *board)
 	{
         map(board);
         move(board);
-		AI(board);
+	AI(board);
 	}
 }
 
