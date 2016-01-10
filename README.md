@@ -14,7 +14,7 @@ Must be well commented. -- Subjective, could do with more.
 Desired feaures:
 
 GUI -- Done. See TicUI.c, requires GTK+3.0 and to be compiled with this library. 
-    When implementing a GUI, a new file will be created to showcase both the ASCII terminal version as well as the GUI version. 
+
 
 
 
