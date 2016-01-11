@@ -22,6 +22,8 @@ static void ButtonSet(char *board);
 static void ButtonMove(GtkButton *button, char *board);
 void quick_message(GtkWindow *parent, gchar *message, char *board);
 static void ButtonChange(GtkButton *button, char *M);
+static void ButtonReset(GtkButton *button, char *board);
+
 
 int main (void)
 {
@@ -47,13 +49,18 @@ int main (void)
  	}
   
  	button = gtk_builder_get_object (builder, "quit");
- 	g_signal_connect (button, "clicked", G_CALLBACK (gtk_main_quit), NULL);
+ 	g_signal_connect (button, "clicked", G_CALLBACK(gtk_main_quit), NULL);
+ 	button = gtk_builder_get_object(builder, "reset");
+ 	g_signal_connect(button, "clicked", G_CALLBACK(ButtonReset), board);
 
  	gtk_main();
 
   return 0;
 }
-
+static void ButtonReset(GtkButton *button, char *board)
+{
+	ButtonSet(board);
+}
 
 int checkRow(char *board)
 {
