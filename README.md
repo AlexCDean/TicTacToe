@@ -1,3 +1,6 @@
+<span style="color: #f2cf4a; font-family: Babas; font-size: 3em;">WARNING: CODE CONTAINS ROOKIE MISTAKES</span>
+
+
 #Tic Tac Toe
 This repository is for a Tic Tac Toe/Noughts and Crosses game made in C using a depth first search for AI. 
 
